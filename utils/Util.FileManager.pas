@@ -9,6 +9,7 @@ type
   TUtilFileManager = class
   public
     class function GetDataSetFileListFromFolder(AFolderPath: string): TClientDataSet;
+    class procedure ValidateVLCPath(AFolderPath: string);
   end;
 
 implementation
@@ -31,10 +32,10 @@ begin
 
   Result := TClientDataSet.Create(nil);
   Result.FieldDefs.Add('ID', ftInteger);
-  Result.FieldDefs.Add('FILENAME', ftString, 256);
-  Result.FieldDefs.Add('ORIGINALFILENAME', ftString, 256);
-  Result.FieldDefs.Add('FILEEXTENSION', ftString, 20);
-  Result.FieldDefs.Add('COMPLETEFILEPATH', ftString, 3000);
+  Result.FieldDefs.Add('FILENAME', ftWideString, 256);
+  Result.FieldDefs.Add('ORIGINALFILENAME', ftWideString, 256);
+  Result.FieldDefs.Add('FILEEXTENSION', ftWideString, 20);
+  Result.FieldDefs.Add('COMPLETEFILEPATH', ftWideString, 3000);
   Result.CreateDataSet;
 
   LStringListFiles := TStringList.Create;
@@ -46,15 +47,22 @@ begin
 
       Result.Append;
       Result.FieldByName('ID').AsInteger := i;
-      Result.FieldByName('FILENAME').AsString := LFileName;
-      Result.FieldByName('ORIGINALFILENAME').AsString := LFileName;
-      Result.FieldByName('FILEEXTENSION').AsString := ExtractFileExt(LStringListFiles.Strings[i]);
-      Result.FieldByName('COMPLETEFILEPATH').AsString := LStringListFiles.Strings[i];
+      Result.FieldByName('FILENAME').AsWideString := LFileName;
+      Result.FieldByName('ORIGINALFILENAME').AsWideString := LFileName;
+      Result.FieldByName('FILEEXTENSION').AsWideString := ExtractFileExt(LStringListFiles.Strings[i]);
+      Result.FieldByName('COMPLETEFILEPATH').AsWideString := LStringListFiles.Strings[i];
       Result.Post;
     end;
   finally
     FreeAndNil(LStringListFiles);
   end;
+end;
+
+class procedure TUtilFileManager.ValidateVLCPath(AFolderPath: string);
+begin
+  if not FileExists(AFolderPath+'\libvlccore.dll') or not FileExists(AFolderPath+'\libvlc.dll') then
+    raise Exception.CreateFmt('Instalação do VLC Player inválida.' + sLineBreak +
+      'Não foram detectadas bibliotecas necessárias em "%s".', [AFolderPath]);
 end;
 
 end.

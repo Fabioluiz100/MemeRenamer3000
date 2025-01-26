@@ -1,4 +1,4 @@
-object fmPrincipal: TfmPrincipal
+object fmMain: TfmMain
   Left = 0
   Top = 0
   Caption = 'Meme Renamer 3000'
@@ -14,7 +14,7 @@ object fmPrincipal: TfmPrincipal
   OnClose = FormClose
   OnCreate = FormCreate
   TextHeight = 15
-  object pnPrincipal: TPanel
+  object pnMain: TPanel
     Left = 0
     Top = 25
     Width = 956
@@ -111,6 +111,55 @@ object fmPrincipal: TfmPrincipal
       TabOrder = 2
       ExplicitWidth = 645
       ExplicitHeight = 423
+      object pnVideo: TPanel
+        Left = 1
+        Top = 6
+        Width = 649
+        Height = 99
+        TabOrder = 0
+        Visible = False
+        object pnVideoControls: TPanel
+          Left = 1
+          Top = 61
+          Width = 647
+          Height = 37
+          Align = alBottom
+          BevelOuter = bvNone
+          TabOrder = 0
+          ExplicitTop = 196
+          DesignSize = (
+            647
+            37)
+          object tbVolume: TTrackBar
+            Left = 496
+            Top = 6
+            Width = 137
+            Height = 21
+            Anchors = [akTop, akRight]
+            Ctl3D = True
+            LineSize = 10
+            Max = 100
+            ParentCtl3D = False
+            PageSize = 1
+            TabOrder = 0
+            TickStyle = tsNone
+            OnChange = tbVolumeChange
+          end
+        end
+        object pnVideoView: TPanel
+          Left = 1
+          Top = 1
+          Width = 647
+          Height = 60
+          Align = alClient
+          BevelOuter = bvNone
+          TabOrder = 1
+          ExplicitLeft = 208
+          ExplicitTop = 80
+          ExplicitWidth = 185
+          ExplicitHeight = 41
+        end
+      end
     end
     object pnFileList: TPanel
       Left = 656
@@ -200,6 +249,13 @@ object fmPrincipal: TfmPrincipal
           item
             Items = <
               item
+                Action = acToolConfig
+              end>
+            Caption = '&Ferramentas'
+          end
+          item
+            Items = <
+              item
                 Action = acAjudaSobre
                 Caption = '&Sobre...'
               end>
@@ -224,6 +280,11 @@ object fmPrincipal: TfmPrincipal
       Category = 'Ajuda'
       Caption = 'Sobre...'
       OnExecute = acAjudaSobreExecute
+    end
+    object acToolConfig: TAction
+      Category = 'Ferramentas'
+      Caption = 'Configura'#231#245'es...'
+      OnExecute = acToolConfigExecute
     end
   end
   object dsFileList: TDataSource
