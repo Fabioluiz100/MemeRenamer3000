@@ -252,7 +252,7 @@ object fmMain: TfmMain
         BevelOuter = bvNone
         Caption = 'Total de arquivos:'
         TabOrder = 1
-        ExplicitTop = 406
+        ExplicitTop = 399
       end
     end
   end
