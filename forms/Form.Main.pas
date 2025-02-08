@@ -1,4 +1,4 @@
-unit uPrincipal;
+unit Form.Main;
 
 interface
 
@@ -7,11 +7,11 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Controller.VLCPlayer,
   Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, System.Actions, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, Vcl.Grids, Data.DB, Vcl.DBGrids,
-  DBClient;
+  DBClient, Vcl.ComCtrls, System.ImageList, Vcl.ImgList;
 
 type
-  TfmPrincipal = class(TForm)
-    pnPrincipal: TPanel;
+  TfmMain = class(TForm)
+    pnMain: TPanel;
     ambMain: TActionMainMenuBar;
     amMain: TActionManager;
     acSelectFolder: TAction;
@@ -26,6 +26,16 @@ type
     fodFolder: TFileOpenDialog;
     edNewFileName: TEdit;
     lbSelectNewFileName: TLabel;
+    acToolConfig: TAction;
+    pnVideo: TPanel;
+    pnVideoControls: TPanel;
+    pnVideoView: TPanel;
+    tbVolume: TTrackBar;
+    btPlay: TButton;
+    ilIcons: TImageList;
+    btPause: TButton;
+    btStop: TButton;
+    pnFileCount: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acSelectFolderExecute(Sender: TObject);
@@ -33,6 +43,11 @@ type
     procedure pnFolderSelectedClick(Sender: TObject);
     procedure gridFileListDblClick(Sender: TObject);
     procedure edNewFileNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure acToolConfigExecute(Sender: TObject);
+    procedure tbVolumeChange(Sender: TObject);
+    procedure btPlayClick(Sender: TObject);
+    procedure btPauseClick(Sender: TObject);
+    procedure btStopClick(Sender: TObject);
   private
     FVLCPlayer: TVLCPlayer;
     FFolderSelected: string;
@@ -53,28 +68,48 @@ type
   end;
 
 var
-  fmPrincipal: TfmPrincipal;
+  fmMain: TfmMain;
 
 implementation
 
 uses
-  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils;
+  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config;
 
 {$R *.dfm}
 
-{ TfmPrincipal }
+{ TfmMain }
 
-procedure TfmPrincipal.acAjudaSobreExecute(Sender: TObject);
+procedure TfmMain.acAjudaSobreExecute(Sender: TObject);
 begin
   ShowMessage('Feito por Fabioluiz100!');
 end;
 
-procedure TfmPrincipal.acSelectFolderExecute(Sender: TObject);
+procedure TfmMain.acSelectFolderExecute(Sender: TObject);
 begin
   SelectFolder;
 end;
 
-procedure TfmPrincipal.ChangeFileName(ANewName: string);
+procedure TfmMain.acToolConfigExecute(Sender: TObject);
+begin
+  TfmConfig.OpenConfigs;
+end;
+
+procedure TfmMain.btPauseClick(Sender: TObject);
+begin
+  FVLCPlayer.PauseMedia;
+end;
+
+procedure TfmMain.btPlayClick(Sender: TObject);
+begin
+  FVLCPlayer.PlayMedia;
+end;
+
+procedure TfmMain.btStopClick(Sender: TObject);
+begin
+  FVLCPlayer.StopMedia;
+end;
+
+procedure TfmMain.ChangeFileName(ANewName: string);
 var
   LNewFileName: string;
 begin
@@ -86,27 +121,27 @@ begin
                              QuotedStr(FileSelected) + '.');
   end;
 
-  FVLCPlayer.StopPlayer;
+  FVLCPlayer.StopMedia;
 
-  if ANewName = FcdsFileList.FieldByName('FILENAME').AsString then
+  if ANewName = FcdsFileList.FieldByName('FILENAME').AsWideString then
     Exit;
 
-  LNewFileName := ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString) +
-    ANewName + FcdsFileList.FieldByName('FILEEXTENSION').AsString;
+  LNewFileName := ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
+    ANewName + FcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
 
   if not RenameFile(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString, LNewFileName) then
     raise Exception.Create('Não foi possível renomear o arquivo!');
 
   FcdsFileList.Edit;
-  FcdsFileList.FieldByName('FILENAME').AsString := ANewName;
-  FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString :=
-    ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString) +
-    FcdsFileList.FieldByName('FILENAME').AsString +
-    FcdsFileList.FieldByName('FILEEXTENSION').AsString;
+  FcdsFileList.FieldByName('FILENAME').AsWideString := ANewName;
+  FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString :=
+    ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
+    FcdsFileList.FieldByName('FILENAME').AsWideString +
+    FcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
   FcdsFileList.Post;
 end;
 
-procedure TfmPrincipal.edNewFileNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfmMain.edNewFileNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if key <> VK_RETURN then
     Exit;
@@ -116,7 +151,7 @@ begin
   OpenSelectedFile;
 end;
 
-procedure TfmPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if Assigned(FVLCPlayer) then
     FreeAndNil(FVLCPlayer);
@@ -124,35 +159,42 @@ begin
     FreeAndNil(FcdsFileList);
 end;
 
-procedure TfmPrincipal.FormCreate(Sender: TObject);
+procedure TfmMain.FormCreate(Sender: TObject);
 begin
   LoadVLCPlayer;
 end;
 
-procedure TfmPrincipal.gridFileListDblClick(Sender: TObject);
+procedure TfmMain.gridFileListDblClick(Sender: TObject);
 begin
   OpenSelectedFile;
 end;
 
-procedure TfmPrincipal.LoadVLCPlayer;
+procedure TfmMain.LoadVLCPlayer;
 begin
   FVLCPlayer := TVLCPlayer.Create;
 end;
 
-procedure TfmPrincipal.OpenSelectedFile;
+procedure TfmMain.OpenSelectedFile;
 begin
+  if not pnVideo.Visible then
+  begin
+    pnVideo.Visible := True;
+    pnVideo.Align := alClient;
+  end;
+
   FIdFileRenaming := FcdsFileList.FieldByName('ID').AsInteger;
 
-  FVLCPlayer.OpenFileInPanel(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString, pnPreview);
-  FileSelected := FcdsFileList.FieldByName('FILENAME').AsString;
+  FVLCPlayer.OpenFileInPanel(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString, pnVideoView);
+  FileSelected := FcdsFileList.FieldByName('FILENAME').AsWideString;
+  tbVolume.Position := FVLCPlayer.GetVolume;
 end;
 
-procedure TfmPrincipal.pnFolderSelectedClick(Sender: TObject);
+procedure TfmMain.pnFolderSelectedClick(Sender: TObject);
 begin
   SelectFolder;
 end;
 
-procedure TfmPrincipal.SelectFolder;
+procedure TfmMain.SelectFolder;
 begin
   if not fodFolder.Execute then
     Exit;
@@ -169,11 +211,13 @@ begin
   OpenSelectedFile;
   dsFileList.DataSet := FcdsFileList;
 
+  pnFileCount.Caption := 'Total de arquivos: ' + FcdsFileList.RecordCount.ToString;
+
   edNewFileName.SetFocus;
   edNewFileName.SelectAll;
 end;
 
-procedure TfmPrincipal.setFileSelected(AFileSelected: string);
+procedure TfmMain.setFileSelected(AFileSelected: string);
 begin
   FFileSelected := AFileSelected;
 
@@ -182,11 +226,16 @@ begin
     edNewFileName.SelectAll;
 end;
 
-procedure TfmPrincipal.setFolderSelected(AFolderSelected: string);
+procedure TfmMain.setFolderSelected(AFolderSelected: string);
 begin
   FFolderSelected := AFolderSelected;
   pnFolderSelected.Font.Style := [fsBold];
   pnFolderSelected.Caption := FFolderSelected;
+end;
+
+procedure TfmMain.tbVolumeChange(Sender: TObject);
+begin
+  FVLCPlayer.SetVolume(tbVolume.Position);
 end;
 
 end.
