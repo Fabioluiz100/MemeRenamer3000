@@ -213,6 +213,7 @@ object fmMain: TfmMain
         TitleFont.Name = 'Segoe UI'
         TitleFont.Style = []
         OnDblClick = gridFileListDblClick
+        OnMouseUp = gridFileListMouseUp
         Columns = <
           item
             Expanded = False
@@ -477,5 +478,16 @@ object fmMain: TfmMain
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
+  end
+  object pmFileOptions: TPopupMenu
+    Left = 688
+    object pmmiOpenFile: TMenuItem
+      Caption = 'Abrir arquivo...'
+      OnClick = pmmiOpenFileClick
+    end
+    object pmmiOpenFileInExplorer: TMenuItem
+      Caption = 'Abrir arquivo no explorer...'
+      OnClick = pmmiOpenFileInExplorerClick
+    end
   end
 end

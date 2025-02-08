@@ -9,13 +9,15 @@ type
   TUtilFileManager = class
   public
     class function GetDataSetFileListFromFolder(AFolderPath: string): TClientDataSet;
+    class procedure OpenFile(const ACompleteFilePath: string);
+    class procedure OpenFileInExplorer(const ACompleteFilePath: string);
     class procedure ValidateVLCPath(AFolderPath: string);
   end;
 
 implementation
 
 uses
-  System.IOUtils, System.Types, Data.DB, System.SysUtils, System.Classes;
+  System.IOUtils, System.Types, Data.DB, System.SysUtils, System.Classes, Winapi.ShellAPI, Winapi.Windows;
 
 { TUtilFileManager }
 
@@ -56,6 +58,18 @@ begin
   finally
     FreeAndNil(LStringListFiles);
   end;
+end;
+
+class procedure TUtilFileManager.OpenFile(const ACompleteFilePath: string);
+begin
+  if FileExists(ACompleteFilePath) then
+    ShellExecute(0, 'open', PChar(ACompleteFilePath), nil, nil, SW_SHOWNORMAL);
+end;
+
+class procedure TUtilFileManager.OpenFileInExplorer(const ACompleteFilePath: string);
+begin
+  if FileExists(ACompleteFilePath) then
+    ShellExecute(0, 'open', 'explorer.exe', PChar('/select,' + ACompleteFilePath), nil, SW_SHOWNORMAL)
 end;
 
 class procedure TUtilFileManager.ValidateVLCPath(AFolderPath: string);

@@ -21,11 +21,13 @@ type
     destructor Destroy;override;
 
     procedure OpenFileInPanel(AFileName: string; var APanel: TPanel);
+    procedure StopPlayer;
     procedure PlayMedia;
     procedure StopMedia;
     procedure PauseMedia;
     procedure SetVolume(ALevel: Integer);
     function GetVolume: Integer;
+    function IsPlaying: Boolean;
 
     property LibaryLoaded: Boolean read getLibaryLoaded;
   end;
@@ -195,7 +197,7 @@ begin
   LUtf8Path := UTF8Encode(AFileName);
   LUTF8StringPath := PAnsiChar(AnsiString(LUtf8Path));
 
-  if not FileExists(LUtf8Path) and
+  if not FileExists(String(LUtf8Path)) and
     (Application.MessageBox(PChar('O arquivo não foi encontrado ou possui um nome não suportado. ' +
       'Deseja tentar abri-lo mesmo assim?'), PChar(Application.Name), MB_YESNO + MB_ICONQUESTION) = mrNo) then
       Exit;
@@ -224,6 +226,11 @@ begin
   Result := libvlc_audio_get_volume(vlcMediaPlayer);
 end;
 
+function TVLCPlayer.IsPlaying: Boolean;
+begin
+  Result := libvlc_media_player_is_playing(vlcMediaPlayer) = 1;
+end;
+
 procedure TVLCPlayer.StopMedia;
 begin
   if not Assigned(vlcMediaPlayer) then
@@ -232,7 +239,14 @@ begin
   libvlc_media_player_stop(vlcMediaPlayer);
   while libvlc_media_player_is_playing(vlcMediaPlayer) = 1 do
     Sleep(100);
+end;
 
+procedure TVLCPlayer.StopPlayer;
+begin
+  if not Assigned(vlcMediaPlayer) then
+    Exit;
+
+  StopMedia;
   libvlc_media_player_release(vlcMediaPlayer);
   vlcMediaPlayer := nil;
   libvlc_release(vlcInstance);

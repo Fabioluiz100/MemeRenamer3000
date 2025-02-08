@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Controller.VLCPlayer,
   Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, System.Actions, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, Vcl.Grids, Data.DB, Vcl.DBGrids,
-  DBClient, Vcl.ComCtrls, System.ImageList, Vcl.ImgList;
+  DBClient, Vcl.ComCtrls, System.ImageList, Vcl.ImgList, Vcl.Menus;
 
 type
   TfmMain = class(TForm)
@@ -36,6 +36,9 @@ type
     btPause: TButton;
     btStop: TButton;
     pnFileCount: TPanel;
+    pmFileOptions: TPopupMenu;
+    pmmiOpenFile: TMenuItem;
+    pmmiOpenFileInExplorer: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acSelectFolderExecute(Sender: TObject);
@@ -48,6 +51,10 @@ type
     procedure btPlayClick(Sender: TObject);
     procedure btPauseClick(Sender: TObject);
     procedure btStopClick(Sender: TObject);
+    procedure pmmiOpenFileClick(Sender: TObject);
+    procedure pmmiOpenFileInExplorerClick(Sender: TObject);
+    procedure gridFileListMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X,
+      Y: Integer);
   private
     FVLCPlayer: TVLCPlayer;
     FFolderSelected: string;
@@ -73,7 +80,7 @@ var
 implementation
 
 uses
-  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config;
+  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config, System.Types;
 
 {$R *.dfm}
 
@@ -101,12 +108,12 @@ end;
 
 procedure TfmMain.btPlayClick(Sender: TObject);
 begin
-  FVLCPlayer.PlayMedia;
+  OpenSelectedFile;
 end;
 
 procedure TfmMain.btStopClick(Sender: TObject);
 begin
-  FVLCPlayer.StopMedia;
+  FVLCPlayer.StopPlayer;
 end;
 
 procedure TfmMain.ChangeFileName(ANewName: string);
@@ -169,6 +176,21 @@ begin
   OpenSelectedFile;
 end;
 
+procedure TfmMain.gridFileListMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+var
+  LMouseCursorPoint: TPoint;
+begin
+  if Button <> mbRight then
+    Exit;
+
+  if not Assigned(FcdsFileList) or not(FcdsFileList.Active) then
+    Exit;
+
+  LMouseCursorPoint := gridFileList.ClientToScreen(Point(X, Y));
+  pmFileOptions.Popup(LMouseCursorPoint.X, LMouseCursorPoint.Y);
+end;
+
 procedure TfmMain.LoadVLCPlayer;
 begin
   FVLCPlayer := TVLCPlayer.Create;
@@ -182,11 +204,23 @@ begin
     pnVideo.Align := alClient;
   end;
 
-  FIdFileRenaming := FcdsFileList.FieldByName('ID').AsInteger;
-
   FVLCPlayer.OpenFileInPanel(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString, pnVideoView);
-  FileSelected := FcdsFileList.FieldByName('FILENAME').AsWideString;
+  if (FIdFileRenaming = 0) or (FIdFileRenaming <> FcdsFileList.FieldByName('ID').AsInteger) then
+  begin
+    FIdFileRenaming := FcdsFileList.FieldByName('ID').AsInteger;
+    FileSelected := FcdsFileList.FieldByName('FILENAME').AsWideString;
+  end;
   tbVolume.Position := FVLCPlayer.GetVolume;
+end;
+
+procedure TfmMain.pmmiOpenFileClick(Sender: TObject);
+begin
+  TUtilFileManager.OpenFile(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString);
+end;
+
+procedure TfmMain.pmmiOpenFileInExplorerClick(Sender: TObject);
+begin
+  TUtilFileManager.OpenFileInExplorer(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString);
 end;
 
 procedure TfmMain.pnFolderSelectedClick(Sender: TObject);
