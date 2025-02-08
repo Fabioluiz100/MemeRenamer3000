@@ -21,7 +21,9 @@ type
     destructor Destroy;override;
 
     procedure OpenFileInPanel(AFileName: string; var APanel: TPanel);
-    procedure StopPlayer;
+    procedure PlayMedia;
+    procedure StopMedia;
+    procedure PauseMedia;
     procedure SetVolume(ALevel: Integer);
     function GetVolume: Integer;
 
@@ -54,6 +56,7 @@ var
   libvlc_release : procedure(p_instance: Plibvlc_instance_t); cdecl;
   libvlc_audio_get_volume : function(p_media_player : Plibvlc_media_player_t): Integer; cdecl;
   libvlc_audio_set_volume : function(p_media_player : Plibvlc_media_player_t; volume : Integer) : Integer; cdecl;
+  libvlc_media_player_pause : procedure(p_media_player : Plibvlc_media_player_t); cdecl;
 
   vlcLib: integer;
   vlcInstance: plibvlc_instance_t;
@@ -141,6 +144,7 @@ begin
   GetAProcAddress(AVlcHandle, @libvlc_media_new_path, 'libvlc_media_new_path', AFailedList);
   GetAProcAddress(AVlcHandle, @libvlc_audio_get_volume, 'libvlc_audio_get_volume', AFailedList);
   GetAProcAddress(AVlcHandle, @libvlc_audio_set_volume, 'libvlc_audio_set_volume', AFailedList);
+  GetAProcAddress(AVlcHandle, @libvlc_media_player_pause , 'libvlc_media_player_pause', AFailedList);
 
   Result := AFailedList.Count = 0;
 end;
@@ -186,7 +190,7 @@ var
   LUtf8Path: UTF8String;
   LUTF8StringPath: PAnsiChar;
 begin
-  StopPlayer;
+  StopMedia;
 
   LUtf8Path := UTF8Encode(AFileName);
   LUTF8StringPath := PAnsiChar(AnsiString(LUtf8Path));
@@ -220,7 +224,7 @@ begin
   Result := libvlc_audio_get_volume(vlcMediaPlayer);
 end;
 
-procedure TVLCPlayer.StopPlayer;
+procedure TVLCPlayer.StopMedia;
 begin
   if not Assigned(vlcMediaPlayer) then
     Exit;
@@ -232,6 +236,22 @@ begin
   libvlc_media_player_release(vlcMediaPlayer);
   vlcMediaPlayer := nil;
   libvlc_release(vlcInstance);
+end;
+
+procedure TVLCPlayer.PauseMedia;
+begin
+  if not Assigned(vlcMediaPlayer) then
+    Exit;
+
+  libvlc_media_player_pause(vlcMediaPlayer);
+end;
+
+procedure TVLCPlayer.PlayMedia;
+begin
+  if not Assigned(vlcMediaPlayer) then
+    Exit;
+
+  libvlc_media_player_play(vlcMediaPlayer);
 end;
 
 end.

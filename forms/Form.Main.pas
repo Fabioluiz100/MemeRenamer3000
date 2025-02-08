@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Controller.VLCPlayer,
   Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, System.Actions, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, Vcl.Grids, Data.DB, Vcl.DBGrids,
-  DBClient, Vcl.ComCtrls;
+  DBClient, Vcl.ComCtrls, System.ImageList, Vcl.ImgList;
 
 type
   TfmMain = class(TForm)
@@ -31,6 +31,11 @@ type
     pnVideoControls: TPanel;
     pnVideoView: TPanel;
     tbVolume: TTrackBar;
+    btPlay: TButton;
+    ilIcons: TImageList;
+    btPause: TButton;
+    btStop: TButton;
+    pnFileCount: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acSelectFolderExecute(Sender: TObject);
@@ -40,6 +45,9 @@ type
     procedure edNewFileNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acToolConfigExecute(Sender: TObject);
     procedure tbVolumeChange(Sender: TObject);
+    procedure btPlayClick(Sender: TObject);
+    procedure btPauseClick(Sender: TObject);
+    procedure btStopClick(Sender: TObject);
   private
     FVLCPlayer: TVLCPlayer;
     FFolderSelected: string;
@@ -86,6 +94,21 @@ begin
   TfmConfig.OpenConfigs;
 end;
 
+procedure TfmMain.btPauseClick(Sender: TObject);
+begin
+  FVLCPlayer.PauseMedia;
+end;
+
+procedure TfmMain.btPlayClick(Sender: TObject);
+begin
+  FVLCPlayer.PlayMedia;
+end;
+
+procedure TfmMain.btStopClick(Sender: TObject);
+begin
+  FVLCPlayer.StopMedia;
+end;
+
 procedure TfmMain.ChangeFileName(ANewName: string);
 var
   LNewFileName: string;
@@ -98,7 +121,7 @@ begin
                              QuotedStr(FileSelected) + '.');
   end;
 
-  FVLCPlayer.StopPlayer;
+  FVLCPlayer.StopMedia;
 
   if ANewName = FcdsFileList.FieldByName('FILENAME').AsWideString then
     Exit;
@@ -187,6 +210,8 @@ begin
   FcdsFileList.First;
   OpenSelectedFile;
   dsFileList.DataSet := FcdsFileList;
+
+  pnFileCount.Caption := 'Total de arquivos: ' + FcdsFileList.RecordCount.ToString;
 
   edNewFileName.SetFocus;
   edNewFileName.SelectAll;
