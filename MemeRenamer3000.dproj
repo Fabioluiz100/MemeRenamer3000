@@ -124,6 +124,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="utils\Util.Config.pas"/>
+        <DCCReference Include="enums\Enum.FileType.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

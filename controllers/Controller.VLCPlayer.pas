@@ -228,6 +228,9 @@ end;
 
 function TVLCPlayer.IsPlaying: Boolean;
 begin
+  if not Assigned(vlcMediaPlayer) then
+    Exit(False);
+
   Result := libvlc_media_player_is_playing(vlcMediaPlayer) = 1;
 end;
 

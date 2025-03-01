@@ -8,7 +8,8 @@ uses
   Vcl.Styles,
   Util.FileManager in 'utils\Util.FileManager.pas',
   Form.Config in 'forms\Form.Config.pas' {fmConfig},
-  Util.Config in 'utils\Util.Config.pas';
+  Util.Config in 'utils\Util.Config.pas',
+  Enum.FileType in 'enums\Enum.FileType.pas';
 
 {$R *.res}
 

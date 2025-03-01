@@ -3,7 +3,7 @@ unit Util.FileManager;
 interface
 
 uses
-  DBClient;
+  DBClient, Enum.FileType;
 
 type
   TUtilFileManager = class
@@ -12,12 +12,24 @@ type
     class procedure OpenFile(const ACompleteFilePath: string);
     class procedure OpenFileInExplorer(const ACompleteFilePath: string);
     class procedure ValidateVLCPath(AFolderPath: string);
+    class function GetFileTypeByExt(AFileExt: string): TFileType;
   end;
+
+const
+  AUDIO_VIDEO_EXTS: array[0..14] of String = (
+    'mp3', 'wav', 'ogg', 'flac', 'aac', 'wma', 'm4a',
+    'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'mpeg'
+  );
+
+  IMAGE_EXTS: array[0..9] of String = (
+    'jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff', 'tif', 'ico', 'webp', 'svg'
+  );
 
 implementation
 
 uses
-  System.IOUtils, System.Types, Data.DB, System.SysUtils, System.Classes, Winapi.ShellAPI, Winapi.Windows;
+  System.IOUtils, Data.DB, System.Types, System.SysUtils, System.Classes, Winapi.ShellAPI, Winapi.Windows,
+  System.StrUtils;
 
 { TUtilFileManager }
 
@@ -77,6 +89,23 @@ begin
   if not FileExists(AFolderPath+'\libvlccore.dll') or not FileExists(AFolderPath+'\libvlc.dll') then
     raise Exception.CreateFmt('Instalação do VLC Player inválida.' + sLineBreak +
       'Não foram detectadas bibliotecas necessárias em "%s".', [AFolderPath]);
+end;
+
+class function TUtilFileManager.GetFileTypeByExt(AFileExt: string): TFileType;
+var
+  LIndex: Integer;
+  LFileExt: String;
+begin
+  LIndex := 0;
+  LFileExt := StringReplace(AFileExt, '.', '', [rfReplaceAll]);
+  LFileExt := LowerCase(LFileExt);
+
+  if MatchStr(LFileExt, AUDIO_VIDEO_EXTS) then
+    Result := TFileType.ftAudioVideo
+  else if MatchStr(LFileExt, IMAGE_EXTS) then
+    Result := TFileType.ftImage
+  else
+    Result := TFileType.ftUnknown;
 end;
 
 end.

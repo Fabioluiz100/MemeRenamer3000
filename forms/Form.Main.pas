@@ -39,6 +39,7 @@ type
     pmFileOptions: TPopupMenu;
     pmmiOpenFile: TMenuItem;
     pmmiOpenFileInExplorer: TMenuItem;
+    imgImagem: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acSelectFolderExecute(Sender: TObject);
@@ -64,6 +65,8 @@ type
     procedure SelectFolder;
     procedure LoadVLCPlayer;
     procedure OpenSelectedFile;
+    procedure OpenImageFile;
+    procedure OpenVideoFile;
     procedure setFolderSelected(AFolderSelected: string);
     procedure setFileSelected(AFileSelected: string);
     procedure ChangeFileName(ANewName: string);
@@ -80,7 +83,8 @@ var
 implementation
 
 uses
-  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config, System.Types;
+  System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config, System.Types,
+  Enum.FileType, Vcl.Imaging.PNGImage, Vcl.Imaging.jpeg, Vcl.Imaging.GIFImg;
 
 {$R *.dfm}
 
@@ -197,7 +201,43 @@ begin
 end;
 
 procedure TfmMain.OpenSelectedFile;
+var
+  LFileType: TFileType;
 begin
+  LFileType := TUtilFileManager.GetFileTypeByExt(FcdsFileList.FieldByName('FILEEXTENSION').AsString);
+
+  case LFileType of
+    ftAudioVideo: OpenVideoFile;
+    ftImage: OpenImageFile;
+    else
+      Application.MessageBox(
+        PChar(Format('Arquivo "%s" ainda não é suportado.', [FcdsFileList.FieldByName('FILEEXTENSION').AsString])),
+        'Atenção!', MB_ICONWARNING + MB_OK);
+  end;
+end;
+
+procedure TfmMain.OpenImageFile;
+begin
+  pnVideo.Visible := False;
+
+  if FVLCPlayer.IsPlaying then
+    FVLCPlayer.StopPlayer;
+
+  imgImagem.Visible := True;
+  try
+    imgImagem.Picture.LoadFromFile(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString);
+  except on E: Exception do
+    Application.MessageBox(
+        PChar(Format('Não foi possível abrir a imagem "%s". Motivo: %s',
+        [FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString, E.Message])),
+        'Falha ao abrir imagem', MB_ICONERROR + MB_OK);
+  end;
+end;
+
+procedure TfmMain.OpenVideoFile;
+begin
+  imgImagem.Visible := False;
+
   if not pnVideo.Visible then
   begin
     pnVideo.Visible := True;

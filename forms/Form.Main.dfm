@@ -111,13 +111,27 @@ object fmMain: TfmMain
       TabOrder = 2
       ExplicitWidth = 645
       ExplicitHeight = 423
+      object imgImagem: TImage
+        Left = 1
+        Top = 100
+        Width = 649
+        Height = 328
+        Align = alClient
+        Visible = False
+        ExplicitLeft = 200
+        ExplicitTop = 176
+        ExplicitWidth = 105
+        ExplicitHeight = 105
+      end
       object pnVideo: TPanel
         Left = 1
-        Top = 6
+        Top = 1
         Width = 649
         Height = 99
+        Align = alTop
         TabOrder = 0
         Visible = False
+        ExplicitWidth = 643
         object pnVideoControls: TPanel
           Left = 1
           Top = 61
@@ -126,6 +140,7 @@ object fmMain: TfmMain
           Align = alBottom
           BevelOuter = bvSpace
           TabOrder = 0
+          ExplicitWidth = 641
           DesignSize = (
             647
             37)
@@ -143,6 +158,7 @@ object fmMain: TfmMain
             TabOrder = 0
             TickStyle = tsNone
             OnChange = tbVolumeChange
+            ExplicitLeft = 490
           end
           object btPlay: TButton
             Left = 24
@@ -186,6 +202,7 @@ object fmMain: TfmMain
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitWidth = 641
         end
       end
     end
