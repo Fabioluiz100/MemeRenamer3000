@@ -9,7 +9,8 @@ uses
   Util.FileManager in 'utils\Util.FileManager.pas',
   Form.Config in 'forms\Form.Config.pas' {fmConfig},
   Util.Config in 'utils\Util.Config.pas',
-  Enum.FileType in 'enums\Enum.FileType.pas';
+  Enum.FileType in 'enums\Enum.FileType.pas',
+  Form.About in 'forms\Form.About.pas' {fmAbout};
 
 {$R *.res}
 
@@ -18,6 +19,5 @@ begin
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Carbon');
   Application.CreateForm(TfmMain, fmMain);
-  Application.CreateForm(TfmConfig, fmConfig);
   Application.Run;
 end.

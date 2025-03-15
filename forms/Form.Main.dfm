@@ -117,6 +117,9 @@ object fmMain: TfmMain
         Width = 649
         Height = 328
         Align = alClient
+        Center = True
+        Proportional = True
+        Stretch = True
         Visible = False
         ExplicitLeft = 200
         ExplicitTop = 176

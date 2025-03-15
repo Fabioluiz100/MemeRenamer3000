@@ -13,6 +13,7 @@ type
     class procedure OpenFileInExplorer(const ACompleteFilePath: string);
     class procedure ValidateVLCPath(AFolderPath: string);
     class function GetFileTypeByExt(AFileExt: string): TFileType;
+    class procedure ChangeFileName(ANewName: string; var AcdsFileList: TClientDataSet);
   end;
 
 const
@@ -32,6 +33,31 @@ uses
   System.StrUtils;
 
 { TUtilFileManager }
+
+class procedure TUtilFileManager.ChangeFileName(ANewName: string; var AcdsFileList: TClientDataSet);
+var
+  LNewFileName: string;
+begin
+  if ANewName = AcdsFileList.FieldByName('FILENAME').AsWideString then
+    Exit;
+
+  LNewFileName := ExtractFilePath(AcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
+    ANewName + AcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
+
+  if FileExists(LNewFileName) then
+    raise Exception.Create('Esse arquivo já existe!');
+
+  if not RenameFile(AcdsFileList.FieldByName('COMPLETEFILEPATH').AsString, LNewFileName) then
+    raise Exception.Create('Não foi possível renomear o arquivo!');
+
+  AcdsFileList.Edit;
+  AcdsFileList.FieldByName('FILENAME').AsWideString := ANewName;
+  AcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString :=
+    ExtractFilePath(AcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
+    AcdsFileList.FieldByName('FILENAME').AsWideString +
+    AcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
+  AcdsFileList.Post;
+end;
 
 class function TUtilFileManager.GetDataSetFileListFromFolder(AFolderPath: string): TClientDataSet;
 var
@@ -93,10 +119,8 @@ end;
 
 class function TUtilFileManager.GetFileTypeByExt(AFileExt: string): TFileType;
 var
-  LIndex: Integer;
   LFileExt: String;
 begin
-  LIndex := 0;
   LFileExt := StringReplace(AFileExt, '.', '', [rfReplaceAll]);
   LFileExt := LowerCase(LFileExt);
 

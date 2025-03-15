@@ -22,7 +22,7 @@ object fmConfig: TfmConfig
     Align = alClient
     TabOrder = 0
     ExplicitWidth = 500
-    ExplicitHeight = 146
+    ExplicitHeight = 148
     object pnButtons: TPanel
       Left = 1
       Top = 112
@@ -30,7 +30,7 @@ object fmConfig: TfmConfig
       Height = 41
       Align = alBottom
       TabOrder = 0
-      ExplicitTop = 104
+      ExplicitTop = 106
       ExplicitWidth = 498
       DesignSize = (
         504
@@ -38,24 +38,24 @@ object fmConfig: TfmConfig
       object btCancel: TButton
         Left = 422
         Top = 9
-        Width = 69
+        Width = 63
         Height = 25
         Anchors = [akLeft, akTop, akRight]
         Caption = 'Cancelar'
         TabOrder = 0
         OnClick = btCancelClick
-        ExplicitWidth = 63
+        ExplicitWidth = 57
       end
       object btSave: TButton
         Left = 330
         Top = 9
-        Width = 69
+        Width = 63
         Height = 25
         Anchors = [akLeft, akTop, akRight]
         Caption = 'Salvar'
         TabOrder = 1
         OnClick = btSaveClick
-        ExplicitWidth = 63
+        ExplicitWidth = 57
       end
     end
     object pcConfig: TPageControl
@@ -67,7 +67,7 @@ object fmConfig: TfmConfig
       Align = alClient
       TabOrder = 1
       ExplicitWidth = 498
-      ExplicitHeight = 103
+      ExplicitHeight = 105
       object tsConfig: TTabSheet
         Caption = 'Configura'#231#245'es'
         DesignSize = (
@@ -81,14 +81,14 @@ object fmConfig: TfmConfig
           Caption = 'Caminho do VCL Player'
         end
         object lbGetVLCPlayer: TLabel
-          Left = 386
+          Left = 342
           Top = 59
-          Width = 89
+          Width = 127
           Height = 15
           Cursor = crHandPoint
           Anchors = [akTop, akRight]
           BiDiMode = bdRightToLeft
-          Caption = 'Obter VCL Player'
+          Caption = 'Visitar p'#225'gina no Github'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -12
@@ -101,14 +101,14 @@ object fmConfig: TfmConfig
         object edVCLPath: TEdit
           Left = 16
           Top = 37
-          Width = 459
+          Width = 453
           Height = 23
           Cursor = crHandPoint
           Anchors = [akLeft, akTop, akRight]
           ReadOnly = True
           TabOrder = 0
           OnClick = edVCLPathClick
-          ExplicitWidth = 453
+          ExplicitWidth = 447
         end
       end
     end

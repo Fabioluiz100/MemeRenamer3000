@@ -4,6 +4,7 @@ interface
 
 var
   ConfigVCLPath: string;
+  AppVersion: string;
 
 procedure UpdateVLCPath(AVLCPath: string);
 procedure LoadConfigs;
@@ -12,7 +13,7 @@ procedure SaveConfigs;
 implementation
 
 uses
-  System.SysUtils, System.IniFiles;
+  System.SysUtils, System.IniFiles, Winapi.Windows;
 
 procedure LoadConfigs;
 var
@@ -56,7 +57,25 @@ begin
   SaveConfigs;
 end;
 
+procedure GetAppVersion;
+var
+  LSize, LHandle: DWORD;
+  LBuffer: TBytes;
+  LFileInfo: PVSFixedFileInfo;
+  LFileInfoSize: UINT;
+begin
+  LSize := GetFileVersionInfoSize(PChar(ParamStr(0)), LHandle);
+  if LSize > 0 then
+  begin
+    SetLength(LBuffer, LSize);
+    if GetFileVersionInfo(PChar(ParamStr(0)), LHandle, LSize, LBuffer) then
+      if VerQueryValue(LBuffer, '\', Pointer(LFileInfo), LFileInfoSize) then
+        AppVersion := Format('v%d.%d', [HiWord(LFileInfo.dwFileVersionMS), LoWord(LFileInfo.dwFileVersionMS)]);
+  end;
+end;
+
 initialization
   LoadConfigs;
+  GetAppVersion;
 
 end.

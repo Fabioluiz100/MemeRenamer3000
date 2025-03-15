@@ -67,6 +67,7 @@ type
     procedure OpenSelectedFile;
     procedure OpenImageFile;
     procedure OpenVideoFile;
+    procedure ChangeIDRenaming;
     procedure setFolderSelected(AFolderSelected: string);
     procedure setFileSelected(AFileSelected: string);
     procedure ChangeFileName(ANewName: string);
@@ -84,7 +85,7 @@ implementation
 
 uses
   System.SysUtils, Util.FileManager, Winapi.Windows, System.IOUtils, Form.Config, System.Types,
-  Enum.FileType, Vcl.Imaging.PNGImage, Vcl.Imaging.jpeg, Vcl.Imaging.GIFImg;
+  Enum.FileType, Vcl.Imaging.PNGImage, Vcl.Imaging.jpeg, Vcl.Imaging.GIFImg, Form.About, Util.Config;
 
 {$R *.dfm}
 
@@ -92,7 +93,7 @@ uses
 
 procedure TfmMain.acAjudaSobreExecute(Sender: TObject);
 begin
-  ShowMessage('Feito por Fabioluiz100!');
+  TfmAbout.OpenAbout;
 end;
 
 procedure TfmMain.acSelectFolderExecute(Sender: TObject);
@@ -121,35 +122,17 @@ begin
 end;
 
 procedure TfmMain.ChangeFileName(ANewName: string);
-var
-  LNewFileName: string;
 begin
   if FIdFileRenaming <> FcdsFileList.FieldByName('ID').AsInteger then
   begin
     FcdsFileList.First;
     if not FcdsFileList.Locate('ID', FIdFileRenaming, []) then
-      raise Exception.Create('Não foi possível localizar registro do arquivo ' +
-                             QuotedStr(FileSelected) + '.');
+      raise Exception.CreateFmt('Não foi possível localizar na lista de arquivos o ID %d.', [FIdFileRenaming]);
   end;
 
   FVLCPlayer.StopMedia;
 
-  if ANewName = FcdsFileList.FieldByName('FILENAME').AsWideString then
-    Exit;
-
-  LNewFileName := ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
-    ANewName + FcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
-
-  if not RenameFile(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsString, LNewFileName) then
-    raise Exception.Create('Não foi possível renomear o arquivo!');
-
-  FcdsFileList.Edit;
-  FcdsFileList.FieldByName('FILENAME').AsWideString := ANewName;
-  FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString :=
-    ExtractFilePath(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString) +
-    FcdsFileList.FieldByName('FILENAME').AsWideString +
-    FcdsFileList.FieldByName('FILEEXTENSION').AsWideString;
-  FcdsFileList.Post;
+  TUtilFileManager.ChangeFileName(ANewName, FcdsFileList);
 end;
 
 procedure TfmMain.edNewFileNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -172,6 +155,7 @@ end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
 begin
+  Self.Caption := Self.Caption + ' - ' + AppVersion;
   LoadVLCPlayer;
 end;
 
@@ -226,6 +210,7 @@ begin
   imgImagem.Visible := True;
   try
     imgImagem.Picture.LoadFromFile(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString);
+    ChangeIDRenaming;
   except on E: Exception do
     Application.MessageBox(
         PChar(Format('Não foi possível abrir a imagem "%s". Motivo: %s',
@@ -245,12 +230,17 @@ begin
   end;
 
   FVLCPlayer.OpenFileInPanel(FcdsFileList.FieldByName('COMPLETEFILEPATH').AsWideString, pnVideoView);
-  if (FIdFileRenaming = 0) or (FIdFileRenaming <> FcdsFileList.FieldByName('ID').AsInteger) then
+  tbVolume.Position := FVLCPlayer.GetVolume;
+  ChangeIDRenaming;
+end;
+
+procedure TfmMain.ChangeIDRenaming;
+begin
+  if (FIdFileRenaming = -1) or (FIdFileRenaming <> FcdsFileList.FieldByName('ID').AsInteger) then
   begin
     FIdFileRenaming := FcdsFileList.FieldByName('ID').AsInteger;
     FileSelected := FcdsFileList.FieldByName('FILENAME').AsWideString;
   end;
-  tbVolume.Position := FVLCPlayer.GetVolume;
 end;
 
 procedure TfmMain.pmmiOpenFileClick(Sender: TObject);
@@ -280,6 +270,8 @@ begin
     FreeAndNil(FcdsFileList);
   end;
 
+  FIdFileRenaming := -1;
+
   FcdsFileList := TUtilFileManager.GetDataSetFileListFromFolder(FolderSelected);
   FcdsFileList.First;
   OpenSelectedFile;
@@ -289,6 +281,7 @@ begin
 
   edNewFileName.SetFocus;
   edNewFileName.SelectAll;
+
 end;
 
 procedure TfmMain.setFileSelected(AFileSelected: string);
